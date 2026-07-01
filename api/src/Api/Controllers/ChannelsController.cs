@@ -190,7 +190,7 @@ public class ChannelsController : ControllerBase
         // alongside) — widget-loader.js and /widget/chat are both served from there.
         // Defaults to the local Vite dev server so the generated tag works out of
         // the box when following the README's local setup instructions.
-        var widgetBaseUrl = (_configuration["Widget:BaseUrl"] ?? "http://localhost:5173").TrimEnd('/');
+        var widgetBaseUrl = (_configuration["Widget:BaseUrl"] ?? "https://ai-customind.vercel.app").TrimEnd('/');
         var scriptTag = $"<script src=\"{widgetBaseUrl}/widget-loader.js\" data-key=\"{company.PublicApiKey}\" async></script>";
 
         return Ok(new ConnectWebChatResponse(ToDto(existing), scriptTag));
