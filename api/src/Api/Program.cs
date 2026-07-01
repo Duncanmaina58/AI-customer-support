@@ -6,19 +6,34 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Api.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// ---- Services ----------------------------------------------------------------
+// ---- Render PostgreSQL env vars → Npgsql connection string ------------------
+// Render injects individual DB_* variables. We assemble them into the
+// key-value format Npgsql expects and inject it into configuration so
+// DependencyInjection.cs picks it up via GetConnectionString("Default").
+var dbHost     = Environment.GetEnvironmentVariable("DB_HOST");
+var dbPort     = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
+var dbName     = Environment.GetEnvironmentVariable("DB_NAME");
+var dbUser     = Environment.GetEnvironmentVariable("DB_USER");
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
+if (dbHost is not null)
+{
+    builder.Configuration["ConnectionStrings:Default"] =
+        $"Host={dbHost};Port={dbPort};Database={dbName};" +
+        $"Username={dbUser};Password={dbPassword};" +
+        $"SSL Mode=Require;Trust Server Certificate=true";
+}
+
+// ---- Services ----------------------------------------------------------------
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "AI Support Platform API", Version = "v1" });
-
-    // Lets you click "Authorize" in Swagger UI and paste a Bearer token to test
-    // authenticated endpoints without a separate HTTP client.
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
@@ -40,14 +55,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // ---- CORS -------------------------------------------------------------------
-// Two policies:
-//  "DashboardCors" — allows only the dashboard origin (authenticated agents).
-//  "WidgetCors"    — allows any origin for the embeddable chat widget (SignalR hub
-//                    and public API endpoints). Per-company origin validation is a
-//                    Sprint 6 hardening task (validate against registered widget URLs).
-
 const string DashboardCorsPolicy = "DashboardCors";
-const string WidgetCorsPolicy = "WidgetCors";
+const string WidgetCorsPolicy    = "WidgetCors";
 
 builder.Services.AddCors(options =>
 {
@@ -59,18 +68,16 @@ builder.Services.AddCors(options =>
                     ?? ["http://localhost:5173"])
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // required for SignalR WebSocket upgrade
+            .AllowCredentials();
     });
 
-    // Widget is embedded on arbitrary third-party websites so we must allow any origin.
-    // Tenant isolation is achieved via the public API key lookup, not by origin checking.
     options.AddPolicy(WidgetCorsPolicy, policy =>
     {
         policy
             .SetIsOriginAllowed(_ => true)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // required for SignalR
+            .AllowCredentials();
     });
 });
 
@@ -84,19 +91,20 @@ builder.Services
     .AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            ValidateLifetime = true,
+            ValidateIssuer           = true,
+            ValidIssuer              = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience         = true,
+            ValidAudience            = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime         = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
+            IssuerSigningKey         = new SymmetricSecurityKey(
+                                           Encoding.UTF8.GetBytes(jwtSigningKey)),
             ClockSkew = TimeSpan.FromSeconds(30),
         };
     });
@@ -104,7 +112,6 @@ builder.Services
 builder.Services.AddAuthorization();
 
 // ---- Build ------------------------------------------------------------------
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -114,24 +121,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// Apply CORS before auth so the browser's preflight OPTIONS request is handled
-// before it can be rejected by an auth check.
 app.UseCors(DashboardCorsPolicy);
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
-// ChatHub uses WidgetCors so anonymous widget visitors on external sites can connect.
-// All other SignalR usage (e.g. future agent notifications) stays on DashboardCors.
 app.MapHub<ChatHub>("/hubs/chat").RequireCors(WidgetCorsPolicy);
-// Auto-migrate on startup (safe for Render deploys)
+
+// ---- Auto-migrate on startup ------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider
-        .GetRequiredService<AppDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
+
 app.Run();
