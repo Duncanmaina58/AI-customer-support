@@ -23,12 +23,15 @@ jobs:
 
       - name: Restore
         run: dotnet restore
+        working-directory: api
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
+        working-directory: api
 
       - name: Test
         run: dotnet test --no-build --configuration Release --verbosity normal
+        working-directory: api
 
   frontend:
     name: Frontend (React + TypeScript)
