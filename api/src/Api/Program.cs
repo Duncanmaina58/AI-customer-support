@@ -65,7 +65,7 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-                    ?? ["http://localhost:5173"])
+                    ?? ["https://ai-customind.vercel.app"])
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
