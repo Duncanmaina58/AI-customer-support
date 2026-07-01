@@ -1,0 +1,49 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+
+  "Cors": {
+    "AllowedOrigins": [ "http://localhost:5173" ]
+  },
+
+ "ConnectionStrings": {
+    "Default": ""
+  },
+  
+  "Jwt": {
+  "SigningKey": "THIS_IS_A_DEVELOPMENT_SECRET_KEY_CHANGE_ME",
+  "Issuer": "ai-support-platform",
+  "Audience": "ai-support-platform-users",
+  "ExpiryMinutes": 60
+},
+
+  "WhatsApp": {
+    "VerifyToken": "REPLACE_WITH_YOUR_OWN_VERIFY_TOKEN"
+  },
+
+ "Groq": {
+    "_comment_ApiKey": "Set in appsettings.Development.json or GROQ__ApiKey env var — NEVER commit a real key here",
+    "ApiKey":    "",
+    "ChatModel": "llama-3.3-70b-versatile"
+  },
+
+  "Cohere": {
+    "_comment_ApiKey": "Set in appsettings.Development.json or COHERE__ApiKey env var — never commit a real key here",
+    "_comment_model": "embed-multilingual-v3.0 — 1024-dim, 100+ languages including Swahili. Free tier: 1000 calls/month",
+    "ApiKey":          "",
+    "EmbeddingModel":  "embed-multilingual-v3.0"
+  },
+
+  "Widget": {
+    "BaseUrl": "http://localhost:5173"
+  }
+}
+
+
+
+  
