@@ -4,7 +4,8 @@ using Api.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-
+using Api.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // ---- Services ----------------------------------------------------------------
@@ -126,5 +127,11 @@ app.MapControllers();
 // ChatHub uses WidgetCors so anonymous widget visitors on external sites can connect.
 // All other SignalR usage (e.g. future agent notifications) stays on DashboardCors.
 app.MapHub<ChatHub>("/hubs/chat").RequireCors(WidgetCorsPolicy);
-
+// Auto-migrate on startup (safe for Render deploys)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 app.Run();
