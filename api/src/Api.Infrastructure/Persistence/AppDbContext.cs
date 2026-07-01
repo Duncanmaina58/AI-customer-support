@@ -39,6 +39,17 @@ public class AppDbContext : DbContext, IAppDbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
+        // ---- pgvector incompatibility with InMemory provider (unit tests) ----
+        // The InMemory provider used in tests cannot map Pgvector.Vector. We ignore
+        // the Embedding property entirely when running under InMemory so the model
+        // validates cleanly and all tests pass. In production (Npgsql) the full
+        // KnowledgeChunkConfiguration applies and the vector(1024) column is used.
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
+        {
+            modelBuilder.Entity<KnowledgeChunk>()
+                .Ignore(k => k.Embedding);
+        }
+
         // ---- Global tenant query filter ----
         // For every entity type that implements ITenantScoped, automatically add
         // `.Where(e => e.CompanyId == _tenantProvider.CompanyId)` to EVERY query EF
