@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/*
+  Design tokens — carried over from the product roadmap deck so the dashboard
+  and the pitch materials read as the same product. Dark, teal-accented,
+  built for long focused sessions (support agents stare at this all day).
+*/
+@theme {
+  --color-ink-950: #0f172a;   /* page background */
+  --color-ink-900: #1e293b;   /* card / surface background */
+  --color-ink-800: #283548;   /* hover surface */
+  --color-ink-700: #334155;   /* borders on dark surfaces */
+
+  --color-teal-500: #0d9488;  /* primary brand / actions */
+  --color-teal-400: #14b8a6;
+  --color-mint-300: #5eead4;  /* highlight text, success accents */
+
+  --color-muted-400: #94a3b8; /* secondary text on dark */
+  --color-line-200: #e2e8f0;
+
+  --color-amber-500: #f59e0b;
+  --color-coral-500: #f43f5e;
+  --color-purple-500: #8b5cf6;
+  --color-green-500: #22c55e;
+
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-ink-950 text-line-200 antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  /* Visible keyboard focus everywhere — quality floor, not optional. */
+  :focus-visible {
+    outline: 2px solid var(--color-teal-400);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

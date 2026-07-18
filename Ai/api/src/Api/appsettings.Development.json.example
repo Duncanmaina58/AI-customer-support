@@ -1,0 +1,36 @@
+{
+  "_comment": "Copy to appsettings.Development.json (gitignored). Never commit real keys.",
+
+  "ConnectionStrings": {
+    "Default": "Host=localhost;Port=5432;Database=ai_support_platform;Username=postgres;Password=postgres"
+  },
+
+  "Jwt": {
+    "SigningKey": "REPLACE_WITH_A_RANDOM_32+_CHARACTER_SECRET"
+  },
+
+  "WhatsApp": {
+    "VerifyToken": "REPLACE_WITH_A_SECRET_YOU_CHOOSE_AND_ENTER_IN_META_DASHBOARD"
+  },
+
+  "Groq": {
+    "_comment": "Free at https://console.groq.com — handles all AI chat",
+    "ApiKey":    "gsk_REPLACE_WITH_YOUR_GROQ_API_KEY",
+    "ChatModel": "llama-3.3-70b-versatile"
+  },
+
+  "Cohere": {
+    "_comment": "Free trial 1000 calls/month — handles knowledge base embeddings (RAG)",
+    "ApiKey":         "REPLACE_WITH_YOUR_COHERE_API_KEY",
+    "EmbeddingModel": "embed-multilingual-v3.0"
+  },
+
+  "Brevo": {
+    "_comment": "Free tier 300 emails/day — handles ticket notifications + email channel replies",
+    "ApiKey": "xkeysib-REPLACE_WITH_YOUR_BREVO_API_KEY"
+  },
+
+  "Widget": {
+    "BaseUrl": "http://localhost:5173"
+  }
+}
