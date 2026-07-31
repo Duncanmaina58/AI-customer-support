@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/*
+  Design tokens — Deep Space / Futuristic system.
+  Kept the same token NAMES the whole app already uses (ink-*, teal-*,
+  mint-300, muted-400, line-200, coral-500, ...) so every existing
+  component reskins automatically with zero markup changes. Only the
+  values moved, to match the Analytics dashboard + Login page look:
+  near-black base, indigo → violet → pink accents, glassy surfaces.
+*/
+@theme {
+  --color-ink-950: #0a0a0f;   /* page background */
+  --color-ink-900: #111118;   /* card / surface background */
+  --color-ink-800: #1a1a24;   /* hover / elevated surface */
+  --color-ink-700: #26263a;   /* borders on dark surfaces */
+
+  --color-teal-500: #6366f1;  /* primary brand / actions (indigo) */
+  --color-teal-400: #818cf8;  /* lighter accent / hover */
+  --color-mint-300: #c4b5fd;  /* highlight text, secondary accents (violet) */
+
+  --color-muted-400: #8a8a9a; /* secondary text on dark */
+  --color-line-200: #f0f0f5;  /* primary text on dark */
+
+  --color-amber-500: #f59e0b;
+  --color-coral-500: #ef4444;
+  --color-purple-500: #8b5cf6;
+  --color-green-500: #10b981;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-ink-950 text-line-200 antialiased;
+    font-feature-settings: "cv11", "ss01";
+    background-image:
+      radial-gradient(ellipse 60% 50% at 15% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 85% 15%, rgba(139, 92, 246, 0.06) 0%, transparent 60%);
+    background-attachment: fixed;
+  }
+
+  /* Visible keyboard focus everywhere — quality floor, not optional. */
+  :focus-visible {
+    outline: 2px solid var(--color-teal-400);
+    outline-offset: 2px;
+  }
+
+  /* Slim, glowy scrollbars to match the futuristic surface. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.25);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.45);
+    background-clip: padding-box;
+  }
+
+  ::selection {
+    background: rgba(99, 102, 241, 0.35);
+    color: #fff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ─── Shared futuristic keyframes, available anywhere in the app ─── */
+@layer utilities {
+  @keyframes reveal-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes draw-line {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--color-green-500); }
+    50% { opacity: 0.4; box-shadow: 0 0 4px var(--color-green-500); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes particle {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+  @keyframes slide-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scale-in {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float-orb {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(20px, -30px); }
+  }
+  @keyframes typing {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .animate-reveal {
+    animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  .trend-dot {
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  /* Glassmorphic card, matching the Analytics dashboard surfaces.
+     Opt-in via className="glass-card" wherever a card should get the
+     full frosted / top-edge-light treatment without touching colors. */
+  .glass-card {
+    background: rgba(22, 22, 31, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    position: relative;
+    transition: border-color 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  }
+  .glass-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  }
+  .glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Every primary action button in the app is `bg-teal-500 ... hover:bg-teal-400`.
+     Painting a gradient background-image here (which always renders above
+     background-color) turns every one of them into the same indigo → violet
+     signature button used on Login/Analytics/Landing, with zero JSX changes
+     and zero risk to click handlers or existing hover classes underneath. */
+  .bg-teal-500 {
+    background-image: linear-gradient(135deg, #6366f1, #a855f7);
+  }
+  a.bg-teal-500,
+  button.bg-teal-500 {
+    box-shadow: 0 3px 15px rgba(99, 102, 241, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+  }
+  a.bg-teal-500:hover,
+  button.bg-teal-500:not(:disabled):hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 26px rgba(99, 102, 241, 0.35);
+  }
+
+  /* Same trick for the raw card/modal pattern repeated across the app
+     (`rounded-xl border border-ink-700 bg-ink-900`, used for cards, panels,
+     and dialog shells everywhere from onboarding to settings). Compound
+     class selector = higher specificity than the plain utilities, so this
+     safely wins regardless of source order and turns every one of those
+     surfaces into a glassy, top-lit panel matching the Analytics dashboard —
+     no JSX edits required. */
+  .rounded-xl.border.border-ink-700.bg-ink-900 {
+    background-color: rgba(17, 17, 24, 0.8);
+    backdrop-filter: blur(12px);
+    position: relative;
+  }
+  .rounded-xl.border.border-ink-700.bg-ink-900::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    pointer-events: none;
+  }
+
+  /* Modal overlays: soften the flat scrim with a touch of blur. */
+  .bg-black\/60 {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
